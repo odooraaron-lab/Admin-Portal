@@ -42,6 +42,10 @@ export async function POST(req: Request) {
           storage_bytes = case when ${e.storage_bytes != null} then excluded.storage_bytes else sites.storage_bytes end,
           order_id = coalesce(excluded.order_id, sites.order_id),
           updated_at = now()`;
+      // Apps that only pick the site address after payment (e.g. the storybook) link the order here.
+      if (e.order_id) {
+        await sql`update orders set site_slug = ${slug} where id = ${e.order_id} and product_code = ${p.code} and site_slug is null`;
+      }
       handled++;
     } else if (e.type === 'heartbeat' && slug) {
       await sql`update sites set last_seen_at = now(), offline_alert_sent_at = null where product_code = ${p.code} and slug = ${slug}`;

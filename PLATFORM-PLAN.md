@@ -2,67 +2,74 @@
 
 Working draft. Domain is written as `yourbrand.nz` until the name is decided.
 
-## What exists today
+## Decisions (27 Sep 2026)
 
-| App | Where the code is | State |
-| --- | --- | --- |
-| Admin Portal (umbrella) | `Admin-Portal` repo | Built: orders, sites, subscriptions, screens, traffic, products. Not yet connected to any app. |
-| QR code kids party (Storybook TV) | `party-kit` repo, product `story` | Built and self-provisioning. |
-| Party Photo Wall | `party-kit` repo, product `photos` | Built (same repo as above). |
-| TV Slideshow (QR / upload) | `party-kit` repo, product `slideshow` | Built (same repo as above). |
-| Resthome TV | nowhere yet | Not started. The admin already has a placeholder product `familyscreen` (subscription + TV heartbeat) that fits it. |
+- **App codes:** `story`, `photos`, `slideshow`, `resthome` — used in the admin, Stripe metadata and the apps.
+- **Brand:** not chosen yet; `yourbrand` is the placeholder everywhere.
+- **Party store** (`yourbrand.nz`) sells only the three party QR apps, and buyers pay through it.
+- **Ideas outside parties** each get their own website, separate from the party store, but are still
+  managed from the one admin. Resthome TV is the first.
+- **Resthome TV:** one subscription per TV / address. Each TV sits in a resident's room and belongs to one
+  family, who upload photos straight to it. A rest home can have several TVs, each linked to a
+  different family.
 
-The mess, in short: `party-kit` is both the public shop **and** three apps; the admin expects each
-app to report to it but nothing does yet; product codes don't match between the two
-(`story`/`photos` in party-kit vs `storybook`/`photowall` in the admin seed).
+## Apps
 
-## Target layout (all on one domain)
+| App | Code | Repo | Sold on | Customer address | Status |
+| --- | --- | --- | --- | --- | --- |
+| Admin Portal | — | `Admin-Portal` | — | `admin.yourbrand.nz` | Built |
+| Kids TV storybook (QR kids party) | `story` | `party-kit` | party store | `<name>.yourbrand.nz` | Built, connected to admin |
+| Party photo wall | `photos` | `party-kit` | party store | `<name>.yourbrand.nz` | Built, connected to admin |
+| TV slideshow (QR) | `slideshow` | `party-kit` | party store | `<name>.yourbrand.nz` | Built, connected to admin |
+| Resthome TV | `resthome` | new repo | its own site, `resthome.yourbrand.nz` | `<room>.resthome.yourbrand.nz` | Not started (hidden in admin) |
+
+## Layout on one domain
 
 ```
-yourbrand.nz              → public shop / marketing          (party-kit, main site)
-admin.yourbrand.nz        → Admin Portal, private, 2FA        (Admin-Portal)
-<slug>.yourbrand.nz       → a customer's party / slideshow    (party-kit, wildcard)
-care.yourbrand.nz         → Resthome TV sign-in + dashboard   (new app, see below)
-<home>.care.yourbrand.nz  → optional: each rest home's screen (new app)
+yourbrand.nz                    → party store (party-kit)
+<name>.yourbrand.nz             → a customer's party / slideshow (party-kit, wildcard)
+admin.yourbrand.nz              → Admin Portal, private, 2FA
+resthome.yourbrand.nz           → Resthome TV sales site + family sign-in
+<room>.resthome.yourbrand.nz    → one TV (one family)
 ```
 
-Vercel matches an explicitly added domain (`admin.…`, `care.…`) before the wildcard `*.…`, so the
-admin and future apps can sit on the same domain as the customer subdomains. `admin`, `app`,
-`api`, `www` etc. are already reserved in `party-kit/src/lib/slug.ts`; any new app subdomain
-(e.g. `care`) must be added to that list too so a customer can never be given it.
+Vercel matches explicitly added domains (`admin.…`, `resthome.…`, `*.resthome.…`) before the wildcard
+`*.yourbrand.nz`, so everything shares the domain. `admin`, `hq`, `resthome` and `care` are reserved in
+`party-kit/src/lib/slug.ts` so a party can never take them. Each future idea gets its own subdomain
+(or its own domain later), its own Vercel project and database, and appears in the admin as a product.
 
-Two Vercel projects to start (shop+party apps, admin), a third when Resthome TV is built.
-Each keeps its own database; they only talk through the admin's signed API (see `INTEGRATION.md`).
+## How apps connect to the admin
 
-## Decision: keep the three party apps together
+See `INTEGRATION.md`. party-kit is special: one deployment runs three admin products, so it has
+one secret per product (`HQ_SECRET_STORY`, `HQ_SECRET_PHOTOS`, `HQ_SECRET_SLIDESHOW`) and the admin now
+sends `x-hq-product` on its action calls so the app knows which secret to check. When a site is
+reported with its `order_id`, the admin fills in that order's site (the storybook only picks its
+address after payment).
 
-Storybook, Photo Wall and Slideshow share checkout, provisioning, the subdomain router, email and
-cleanup. Splitting them would triplicate that for no gain. They stay in `party-kit` and appear in
-the admin as three products. Resthome TV is different (subscription, care-home staff, always-on
-screens) so it becomes its own app.
+## Done
 
-## Steps
+- [x] Product codes aligned (admin seed renamed; party-kit already used them)
+- [x] party-kit reports new/changed sites, tags checkouts with `metadata.product`, adds the beacon
+      (with TV check-ins), and handles Turn off / Turn on / Add 30 days / Resend email
 
-1. **Align product codes.** Pick one set and use it everywhere. Suggested: `story`, `photos`,
-   `slideshow`, `resthome` (change the admin seed; party-kit already uses the first three).
-2. **Connect party-kit to the admin** (per `INTEGRATION.md`):
-   - copy `hq-kit/hq.ts` → `party-kit/src/lib/hq.ts`, `route-hq-action.ts` → `src/app/api/hq/action/route.ts`
-   - `provisionParty()` → `reportToHQ({ type: 'site.upsert', … })`
-   - add `metadata: { product, site_slug }` to the three checkout routes
-   - add the beacon tag; `data-heartbeat` on the TV pages
-   - fill the action TODOs (turn off/on, extend, resend) with party-kit's DB calls
-   - make sure the middleware lets `/api/hq/action` through on the main domain
-3. **Domains.** Point nameservers at Vercel, add `yourbrand.nz` + `*.yourbrand.nz` to party-kit,
-   `admin.yourbrand.nz` to the admin project. Point one Stripe webhook at the admin and keep
-   party-kit's own webhook for provisioning.
-4. **Resthome TV.** New repo from the same pattern: subscription checkout, a staff page to upload
-   photos/notices, a TV page with heartbeat so the admin's Screens page shows offline TVs.
-   Register it in Admin → Products (starts hidden), then go live.
-5. **Later:** single sign-on isn't needed — only you use the admin. A shared UI package is only
-   worth it once there are 3+ separate apps.
+## Next
 
-## Open questions
+1. **Go live checklist** — run `sql/schema.sql` on a fresh admin DB (if it was already run with the old
+   codes, rename them: `update products set code = …`), deploy both projects, add domains, set the
+   env vars (`HQ_URL` + three secrets in party-kit; each product's app URL = `https://yourbrand.nz` in the admin),
+   point one Stripe webhook at the admin.
+2. **Shop traffic** — the beacon is on party pages only. Add it to the store's own pages
+   (e.g. tagging each app's sales page with its product) to see visit-to-sale in Traffic.
+3. **Resthome TV** — new repo:
+   - sales site with a monthly subscription per TV (Stripe `subscription_data.metadata = { product: 'resthome', site_slug }`)
+   - per-TV address; family upload page with a private link (reuse the slideshow's upload + Blob code)
+   - TV page: photo loop, with `data-heartbeat` so the admin's Screens page flags offline TVs
+   - a cancelled/failed subscription pauses the TV (admin "Turn off" uses the same path)
+   - later: rest-home staff view listing all TVs in their home
 
-- Brand name / domain?
-- Resthome TV: who uploads (staff, families, both)? Monthly price? One screen or many per home?
-- Is the physical-goods shop (party packs) staying, or is it apps only?
+## Open questions (Resthome TV)
+
+- Monthly price per TV?
+- Who sets up the TV in the room — family, staff or you?
+- Should families be able to invite more relatives to upload to the same TV?
+- Anything besides photos (videos, short messages, a clock/date for residents)?

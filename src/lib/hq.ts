@@ -11,7 +11,7 @@ export async function callProduct(p: Product, action: SiteAction, payload: Recor
   const body = JSON.stringify({ action, ...payload, ts: Date.now() });
   const res = await fetch(new URL('/api/hq/action', p.hq_base_url), {
     method: 'POST',
-    headers: { 'content-type': 'application/json', 'x-hq-signature': sign(p.hq_secret, body) },
+    headers: { 'content-type': 'application/json', 'x-hq-product': p.code, 'x-hq-signature': sign(p.hq_secret, body) },
     body,
     cache: 'no-store',
   });

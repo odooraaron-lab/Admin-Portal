@@ -2,9 +2,9 @@
 -- Safe to re-run: it only creates what's missing.
 
 create table if not exists products (
-  code             text primary key,               -- short id, e.g. 'storybook'
+  code             text primary key,               -- short id, e.g. 'story'
   name             text not null,
-  domain           text not null,                  -- e.g. 'storybook.yourbrand.nz'
+  domain           text not null,                  -- e.g. 'yourbrand.nz' or 'resthome.yourbrand.nz'
   pricing_type     text not null check (pricing_type in ('one_time','subscription')),
   status           text not null default 'live' check (status in ('live','hidden','sold_out')),
   features         jsonb not null default '{}'::jsonb,
@@ -98,18 +98,19 @@ create table if not exists audit_log (
 );
 
 -- Starting products. Change the domains once your brand name is chosen
--- (or edit them on the Products page).
+-- (or edit them on the Products page). The three party apps all run from
+-- party-kit on the main domain (<slug>.yourbrand.nz), so they share it.
 insert into products (code, name, domain, pricing_type, status, features, color, sort, hq_secret) values
- ('storybook',   'Kids TV storybook', 'storybook.yourbrand.nz',   'one_time',     'live',
+ ('story',     'Kids TV storybook', 'yourbrand.nz',          'one_time',     'live',
    '{"host_page":true,"guest_uploads":true,"themes":true,"expiry":true}', '#D4502F', 10,
    replace(gen_random_uuid()::text,'-','') || replace(gen_random_uuid()::text,'-','')),
- ('photowall',   'Photo wall',        'photowall.yourbrand.nz',   'one_time',     'live',
-   '{"guest_uploads":true,"expiry":true}', '#6D4BC3', 20,
+ ('photos',    'Party photo wall',  'yourbrand.nz',          'one_time',     'live',
+   '{"host_page":true,"guest_uploads":true,"themes":true,"expiry":true}', '#6D4BC3', 20,
    replace(gen_random_uuid()::text,'-','') || replace(gen_random_uuid()::text,'-','')),
- ('slideshow',   'TV slideshow',      'slideshow.yourbrand.nz',   'one_time',     'live',
+ ('slideshow', 'TV slideshow',      'yourbrand.nz',          'one_time',     'live',
    '{"expiry":true}', '#1F6F6B', 30,
    replace(gen_random_uuid()::text,'-','') || replace(gen_random_uuid()::text,'-','')),
- ('familyscreen','Family Screen',     'familyscreen.yourbrand.nz','subscription', 'hidden',
-   '{"host_page":true,"guest_uploads":true,"heartbeat":true}', '#B7791F', 40,
+ ('resthome',  'Resthome TV',       'resthome.yourbrand.nz', 'subscription', 'hidden',
+   '{"guest_uploads":true,"heartbeat":true}', '#B7791F', 40,
    replace(gen_random_uuid()::text,'-','') || replace(gen_random_uuid()::text,'-',''))
 on conflict (code) do nothing;
