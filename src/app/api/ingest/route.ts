@@ -37,7 +37,7 @@ export async function POST(req: Request) {
           owner_email = coalesce(excluded.owner_email, sites.owner_email),
           owner_name = coalesce(excluded.owner_name, sites.owner_name),
           theme = coalesce(excluded.theme, sites.theme),
-          status = excluded.status,
+          status = coalesce(${e.status ?? null}::text, sites.status),
           expires_at = coalesce(excluded.expires_at, sites.expires_at),
           storage_bytes = case when ${e.storage_bytes != null} then excluded.storage_bytes else sites.storage_bytes end,
           order_id = coalesce(excluded.order_id, sites.order_id),

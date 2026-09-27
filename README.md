@@ -33,3 +33,6 @@ and a product list you add new apps to.
 | Products | Add the next app, set its status (live, sold out, hidden), get its connection details |
 
 Connecting a product app: see `INTEGRATION.md`.
+
+## Changes
+- Sites keep their status (e.g. turned off) when an app sends a routine update without one.
