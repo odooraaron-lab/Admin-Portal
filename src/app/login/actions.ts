@@ -19,10 +19,7 @@ export async function login(_: unknown, form: FormData) {
   const emailOk = email === adminEmail;
   const pwOk = await bcrypt.compare(password, hash);
   const codeOk = !totpSecret || authenticator.check(code, totpSecret);
-console.log('login check', {
-  emailOk, pwOk, codeOk,
-  emailSet: !!adminEmail, hashLength: hash.length, totpLength: totpSecret.length,
-});
+
   if (!emailOk || !pwOk || !codeOk) {
     await new Promise((r) => setTimeout(r, 800)); // slow down guessing
     return { error: 'Those details don’t match. Check your email, password and 6-digit code.' };
