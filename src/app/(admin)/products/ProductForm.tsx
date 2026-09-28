@@ -11,7 +11,7 @@ export function ProductForm({ p, action, submit }: { p?: Product; action: (f: Fo
       )}
       <label className="field">Name<input name="name" required defaultValue={p?.name} placeholder="Pet portrait screen" /></label>
       <label className="field">Domain
-        <span className="help">Customer sites live under this, like ellie.storybook.yourbrand.nz</span>
+        <span className="help">Customer sites live under this, like ellie.yourbrand.nz</span>
         <input name="domain" required defaultValue={p?.domain} placeholder="petportrait.yourbrand.nz" />
       </label>
       <label className="field">App address

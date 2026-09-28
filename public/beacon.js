@@ -1,5 +1,5 @@
 /* Admin beacon: page views, custom events and TV check-ins. No cookies.
-   <script defer src="https://ADMIN/beacon.js" data-product="storybook" [data-site="ellie"] [data-heartbeat]></script>
+   <script defer src="https://ADMIN/beacon.js" data-product="story" [data-site="ellie"] [data-heartbeat]></script>
    Custom event from your code: window.hqEvent && window.hqEvent('checkout_started') */
 (function () {
   var s = document.currentScript;

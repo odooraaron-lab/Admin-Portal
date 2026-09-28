@@ -26,7 +26,7 @@ export async function POST(req: Request) {
   const p = await getProduct(typeof b.p === 'string' ? b.p : null);
   if (!p) return done();
 
-  // Work out which customer site this came from (ellie.storybook.yourbrand.nz → "ellie").
+  // Work out which customer site this came from (ellie.yourbrand.nz → "ellie").
   const origin = req.headers.get('origin') || req.headers.get('referer') || '';
   let host = '';
   try { host = new URL(origin).hostname.toLowerCase(); } catch {}
