@@ -55,7 +55,7 @@ address after payment).
 ## Next
 
 1. **Go live checklist** — run `sql/schema.sql` on a fresh admin DB (if it was already run with the old
-   codes, rename them: `update products set code = …`), deploy both projects, add domains, set the
+   codes, run `sql/rename-products.sql` once), deploy both projects, add domains, set the
    env vars (`HQ_URL` + three secrets in party-kit; each product's app URL = `https://yourbrand.nz` in the admin),
    point one Stripe webhook at the admin.
 2. **Shop traffic** — the beacon is on party pages only. Add it to the store's own pages
