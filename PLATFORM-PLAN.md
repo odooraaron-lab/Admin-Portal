@@ -21,7 +21,7 @@ Working draft. Domain is written as `yourbrand.nz` until the name is decided.
 | Kids TV storybook (QR kids party) | `story` | `party-kit` | party store | `<name>.yourbrand.nz` | Built, connected to admin |
 | Party photo wall | `photos` | `party-kit` | party store | `<name>.yourbrand.nz` | Built, connected to admin |
 | TV slideshow (QR) | `slideshow` | `party-kit` | party store | `<name>.yourbrand.nz` | Built, connected to admin |
-| Resthome TV | `resthome` | new repo | its own site, `resthome.yourbrand.nz` | `<room>.resthome.yourbrand.nz` | Not started (hidden in admin) |
+| Resthome TV ("Family Screen") | `resthome` | `family-screen` | its own site, `resthome.yourbrand.nz` | `<name>.resthome.yourbrand.nz` | Built, admin hooks in place; hidden until launch |
 
 ## Layout on one domain
 
@@ -60,16 +60,12 @@ address after payment).
    point one Stripe webhook at the admin.
 2. **Shop traffic** — the beacon is on party pages only. Add it to the store's own pages
    (e.g. tagging each app's sales page with its product) to see visit-to-sale in Traffic.
-3. **Resthome TV** — new repo:
-   - sales site with a monthly subscription per TV (Stripe `subscription_data.metadata = { product: 'resthome', site_slug }`)
-   - per-TV address; family upload page with a private link (reuse the slideshow's upload + Blob code)
-   - TV page: photo loop, with `data-heartbeat` so the admin's Screens page flags offline TVs
-   - a cancelled/failed subscription pauses the TV (admin "Turn off" uses the same path)
-   - later: rest-home staff view listing all TVs in their home
+3. **Resthome TV** (`family-screen` repo) — already built: monthly/yearly subscription per screen, family
+   send page, TV player with quiet hours and check-ins, owner page to approve senders. It already reports
+   to the admin; only its product code and domain were changed to `resthome` / `resthome.yourbrand.nz`.
+   Deploy as its own Vercel project (see its README) and set the product Live in the admin.
 
 ## Open questions (Resthome TV)
 
-- Monthly price per TV?
-- Who sets up the TV in the room — family, staff or you?
-- Should families be able to invite more relatives to upload to the same TV?
-- Anything besides photos (videos, short messages, a clock/date for residents)?
+- Customer-facing name: keep "Family Screen" or rename to match "Resthome TV"?
+- Prices for the monthly and yearly plans?

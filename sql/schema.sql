@@ -111,6 +111,6 @@ insert into products (code, name, domain, pricing_type, status, features, color,
    '{"expiry":true}', '#1F6F6B', 30,
    replace(gen_random_uuid()::text,'-','') || replace(gen_random_uuid()::text,'-','')),
  ('resthome',  'Resthome TV',       'resthome.yourbrand.nz', 'subscription', 'hidden',
-   '{"guest_uploads":true,"heartbeat":true}', '#B7791F', 40,
+   '{"host_page":true,"guest_uploads":true,"heartbeat":true}', '#B7791F', 40,
    replace(gen_random_uuid()::text,'-','') || replace(gen_random_uuid()::text,'-',''))
 on conflict (code) do nothing;
