@@ -2,6 +2,7 @@ import type Stripe from 'stripe';
 import { stripe } from '@/lib/stripe';
 import { db } from '@/lib/db';
 import { getProduct, productForPrice } from '@/lib/products';
+import { disableSiteForRefund } from '@/lib/hq';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -121,7 +122,8 @@ async function handle(event: Stripe.Event) {
       const pi = typeof ch.payment_intent === 'string' ? ch.payment_intent : ch.payment_intent?.id;
       if (!pi) return;
       const status = ch.refunded ? 'refunded' : 'partially_refunded';
-      await sql`update orders set status = ${status} where stripe_payment_intent = ${pi}`;
+      const refunded = await sql`update orders set status = ${status} where stripe_payment_intent = ${pi} returning product_code, site_slug, kind`;
+      if (ch.refunded) for (const o of refunded) await disableSiteForRefund(o as any);
       return;
     }
   }
