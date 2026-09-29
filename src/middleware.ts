@@ -12,5 +12,5 @@ export async function middleware(req: NextRequest) {
 
 // Everything is private except login, public APIs (signed or beacon) and static files.
 export const config = {
-  matcher: ['/((?!login|api/stripe|api/ingest|api/collect|api/cron|_next|favicon|beacon\\.js|robots\\.txt).*)'],
+  matcher: ['/((?!login|api/stripe|api/ingest|api/collect|api/cron|_next|favicon|icon|apple-icon|beacon\\.js|robots\\.txt).*)'],
 };
