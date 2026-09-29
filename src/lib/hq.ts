@@ -1,6 +1,7 @@
 // Calls from the admin to a product app (disable a site, resend an email...).
 import { sign } from './signing';
-import type { Product } from './products';
+import { getProduct, type Product } from './products';
+import { db } from './db';
 
 export type SiteAction = 'disable' | 'enable' | 'extend' | 'resend_email';
 
@@ -20,4 +21,20 @@ export async function callProduct(p: Product, action: SiteAction, payload: Recor
     throw new Error(`${p.name} replied ${res.status}${text ? `: ${text.slice(0, 140)}` : ''}`);
   }
   return res.json().catch(() => ({}));
+}
+
+/**
+ * A fully refunded one-off purchase shouldn't keep its site running: turn it off in the
+ * product app and mark it here. Subscriptions are left alone (cancelling handles those).
+ * Returns false if the app couldn't be reached, so the caller can say so.
+ */
+export async function disableSiteForRefund(order: { product_code: string | null; site_slug: string | null; kind: string }) {
+  if (!order.product_code || !order.site_slug || order.kind !== 'one_time') return true;
+  const p = await getProduct(order.product_code);
+  if (!p) return true;
+  let ok = true;
+  try { await callProduct(p, 'disable', { slug: order.site_slug }); }
+  catch (e) { ok = false; console.error('disable after refund failed', order.site_slug, e); }
+  await db()`update sites set status = 'disabled', updated_at = now() where product_code = ${p.code} and slug = ${order.site_slug}`;
+  return ok;
 }

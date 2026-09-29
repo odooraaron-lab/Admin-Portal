@@ -3,7 +3,7 @@ import { revalidatePath } from 'next/cache';
 import { db } from '@/lib/db';
 import { stripe } from '@/lib/stripe';
 import { getProduct } from '@/lib/products';
-import { callProduct } from '@/lib/hq';
+import { callProduct, disableSiteForRefund } from '@/lib/hq';
 import { audit } from '@/lib/audit';
 import { back, errMsg } from '@/lib/flash';
 
@@ -23,9 +23,14 @@ export async function refundOrder(form: FormData) {
   if (failure) back('/orders', 'err', `Stripe didn’t refund it: ${failure}`);
 
   await db()`update orders set status = 'refunded' where id = ${id}`;
-  await audit('order.refund', id, { amount_cents: o.amount_cents });
+  const siteOff = await disableSiteForRefund(o as any);
+  await audit('order.refund', id, { amount_cents: o.amount_cents, site: o.site_slug });
   revalidatePath('/orders');
-  back('/orders', 'ok', `Refunded ${o.customer_email || 'the customer'}.`);
+  revalidatePath('/sites');
+  const siteNote = o.kind === 'one_time' && o.site_slug
+    ? (siteOff ? ' Their site is turned off.' : ' The site couldn’t be turned off automatically; turn it off on the Sites page.')
+    : '';
+  back('/orders', 'ok', `Refunded ${o.customer_email || 'the customer'}.${siteNote}`);
 }
 
 export async function resendWelcome(form: FormData) {
