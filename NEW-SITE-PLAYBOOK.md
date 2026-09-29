@@ -8,6 +8,8 @@ Neon database (each app's tables are prefixed) and one admin (admin.myqr.co.nz).
 | --- | --- | --- | --- | --- |
 | Wishcast party store (3 apps) | party-kit | myqr.co.nz, `*.myqr.co.nz` | story, photos, slideshow | one-time |
 | Resthome TV | family-screen | resthome.myqr.co.nz, `*.resthome.myqr.co.nz` | resthome | subscription |
+| Digital Signage | DigitalSignage | digitalsignage.myqr.co.nz, `*.digitalsignage.myqr.co.nz` | signage | subscription |
+| Review QR | ReviewsQR | reviews.myqr.co.nz | reviews | one-time ($5.99) |
 | Admin | Admin-Portal | admin.myqr.co.nz | n/a | n/a |
 
 ## 1. Decide (5 minutes)

@@ -22,6 +22,7 @@ Working draft. Domain is written as `yourbrand.nz` until the name is decided.
 | Party photo wall | `photos` | `party-kit` | party store | `<name>.yourbrand.nz` | Built, connected to admin |
 | TV slideshow (QR) | `slideshow` | `party-kit` | party store | `<name>.yourbrand.nz` | Built, connected to admin |
 | Resthome TV ("Family Screen") | `resthome` | `family-screen` | its own site, `resthome.yourbrand.nz` | `<name>.resthome.yourbrand.nz` | Built, admin hooks in place; hidden until launch |
+| Review QR (Google review QR code signs) | `reviews` | `ReviewsQR` | its own site, `reviews.myqr.co.nz` | none: each order gets a private download page | Built, admin hooks in place; add the product in the admin, then set it Live |
 
 ## Layout on one domain
 
